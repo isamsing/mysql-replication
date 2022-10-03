@@ -1,0 +1,59 @@
+version: '3'
+services:
+  mysql_master:
+    image: mysql:8.0
+    env_file:
+      - ./master/mysql_master.env
+    container_name: "mysql_master"
+    restart: "no"
+    ports:
+      - 1111:3306
+    volumes:
+      - ./master/conf/mysql.conf.cnf:/etc/mysql/conf.d/mysql.conf.cnf
+      - ./master/data:/var/lib/mysql
+    networks:
+      - overlay
+
+  mysql_replica_one:
+    image: mysql:8.0
+    env_file:
+      - ./replica_one/mysql_replica.env
+    container_name: "mysql_replica_one"
+    restart: "no"
+    ports:
+      - 2222:3306
+    depends_on:
+      - mysql_master
+    volumes:
+      - ./replica_one/conf/mysql.conf.cnf:/etc/mysql/conf.d/mysql.conf.cnf
+      - ./replica_one/data:/var/lib/mysql
+    networks:
+      - overlay
+  
+  mysql_replica_two:
+    image: mysql:8.0
+    env_file:
+      - ./replica_two/mysql_replica.env
+    container_name: "mysql_replica_two"
+    restart: "no"
+    ports:
+      - 3333:3306
+    depends_on:
+      - mysql_master
+    volumes:
+      - ./replica_two/conf/mysql.conf.cnf:/etc/mysql/conf.d/mysql.conf.cnf
+      - ./replica_two/data:/var/lib/mysql
+    networks:
+      - overlay
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - overlay
+
+networks:
+  overlay:
+
